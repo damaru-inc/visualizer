@@ -3,30 +3,36 @@ package com.damaru.visualizer;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ConfigurableApplicationContext;
 
 public class ChartApplication extends Application {
 	private ConfigurableApplicationContext applicationContext;
-
-	@Override
-	public void init() {
-		applicationContext = new SpringApplicationBuilder(VisualizerApplication.class).run();
-	}
-
+	private static final Logger log = LoggerFactory.getLogger(ChartApplication.class);
 	@Override
 	public void start(Stage stage) {
+		log.info("start...");
 		applicationContext.publishEvent(new StageReadyEvent(stage));
 	}
-
 	@Override
-	public void stop() throws Exception {
+	public void stop() {
 		applicationContext.close();
 		Platform.exit();
 	}
 
-	public static class StageReadyEvent extends ApplicationEvent {
+	@Override
+	public void init() {
+		log.info("init");
+		applicationContext = new SpringApplicationBuilder(VisualizerApplication.class).run();
+		for (String beanName : applicationContext.getBeanDefinitionNames()) {
+			log.info(beanName);
+		}
+	}
+
+	static class StageReadyEvent extends ApplicationEvent {
 		public StageReadyEvent(Stage stage) {
 			super(stage);
 		}
